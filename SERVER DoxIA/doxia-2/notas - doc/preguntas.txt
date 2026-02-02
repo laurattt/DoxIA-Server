@@ -1,0 +1,6 @@
+
+mysql server y tuneles?     
+    montar mysql en proxmox (no tuneles ni nada raro)
+
+como funciona el codigo de validacion con el numero del telefono?
+    documentacion en scrum (revisar)
