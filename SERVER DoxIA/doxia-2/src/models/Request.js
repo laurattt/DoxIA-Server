@@ -3,6 +3,11 @@ const { sequelize } = require('../config/database');
 
 
 const Request = sequelize.define('Request', {
+    id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true
+    },
     prompt: { 
         type: DataTypes.TEXT, 
         allowNull: false 
