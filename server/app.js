@@ -83,7 +83,14 @@ app.post('/api/admin/usuaris/login', async (req, res) => {
                     data: {}
                 }
             );
-        } else {
+        } else if (res.status(500).json)(
+             { 
+                    status: "Error 500",
+                    message: 'Ha saltado este error, arreglalo!',
+                    data: {}
+                }
+        );
+         else {
             res.status(401).json(
                 { 
                     status: "Error",
