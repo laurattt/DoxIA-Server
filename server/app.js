@@ -17,14 +17,14 @@ app.use(express.urlencoded({ extended: true }));
 
 
 // servidor activado zzzzz
-
+let httpServer;
 async function startServer() {
     await bbddChecker(); // espera a conectar con la BBDD
     httpServer = app.listen(port, () => {
         console.log(`Servidor escuchando en http://0.0.0.0:${port}`);
     });
 
-    await generateHash('admin123'); // prueba con contraseña admin123
+    //await generateHash('admin123'); // prueba con contraseña admin123
 }
 
 startServer();
@@ -91,14 +91,7 @@ app.post('/api/admin/usuaris/login', async (req, res) => {
                     data: {token: adminUser.api_key }
                 }
             );
-        } else if (res.status(500).json)(
-             { 
-                    status: "Error 500",
-                    message: 'Ha saltado este error, arreglalo!',
-                    data: {}
-                }
-        );
-         else {
+        } else {
             res.status(401).json(
                 { 
                     status: "Error",
