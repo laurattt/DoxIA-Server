@@ -1,1 +1,0 @@
-jest.setTimeout(60000); // 60 segons per tot el suite de tests
