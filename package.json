@@ -2,13 +2,13 @@
   "name": "uxia2",
   "version": "1.0.0",
   "description": "Servidor Node/Sequelize/MySQL projecte UXIA",
-  "homepage": "https://github.com/victor06-git/UXIAServer#readme",
+  "homepage": "https://github.com/laurattt/UXIA-Server#readme",
   "bugs": {
-    "url": "https://github.com/victor06-git/UXIAServer/issues"
+    "url": "https://github.com/laurattt/UXIA-Server/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/victor06-git/UXIAServer.git"
+    "url": "git+https://github.com/laurattt/UXIA-Server.git"
   },
   "license": "ISC",
   "author": "",
