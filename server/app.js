@@ -71,7 +71,9 @@ app.post('/api/admin/usuaris/login', async (req, res) => {
         }
 
         // checker pwd
-        if (bcrypt.compare(password, adminUser.password)) {
+        const isMatch = await bcrypt.compare(password, adminUser.password);
+
+        if (isMatch) {
             res.status(200).json(
                 { 
                     status: "OK",
@@ -79,8 +81,7 @@ app.post('/api/admin/usuaris/login', async (req, res) => {
                     data: {}
                 }
             );
-        }
-        else {
+        } else {
             res.status(401).json(
                 { 
                     status: "Error",
@@ -89,6 +90,7 @@ app.post('/api/admin/usuaris/login', async (req, res) => {
                 }
             );
         }
+
     } catch (error) {
         console.error('Error during admin login:', error);
         res.status(500).json(
