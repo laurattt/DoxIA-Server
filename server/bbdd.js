@@ -173,5 +173,5 @@ image.belongsTo(request, { foreignKey: 'request_id' });
 
 
 
-module.exports = { user, request, response, image };
+module.exports = { sequelize, user, request, response, image };
 

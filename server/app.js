@@ -2,8 +2,9 @@ const express = require("express");
 const cors = require('cors');
 const path = require("path");
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 
-const { sequelize, user, petition, response } = require('./bbdd');
+const { sequelize, user, request, response } = require('./bbdd');
 
 const app = express();
 const port = 3000;
@@ -76,11 +77,18 @@ app.post('/api/admin/usuaris/login', async (req, res) => {
         const isMatch = await bcrypt.compare(password, adminUser.password);
 
         if (isMatch) {
+            
+            // generar token si no existeix
+            if (!adminUser.api_key) {
+                const apiKey = generateApiKey();
+                adminUser.api_key = apiKey;
+                await adminUser.save();
+            }
             res.status(200).json(
                 { 
                     status: "OK",
                     message: 'User successfully authenticated',
-                    data: {}
+                    data: {token: adminUser.api_key }
                 }
             );
         } else if (res.status(500).json)(
@@ -110,8 +118,110 @@ app.post('/api/admin/usuaris/login', async (req, res) => {
     }
 });
 
+// --> /api/admin/usuaris
+app.get('/api/admin/usuaris', async (req, res) => {
+    const apiKey = req.headers['x-api-key'];
+    try {
+        const adminUser = await user.findOne({ where: { api_key: apiKey, role: 'admin' }});
+        if (!adminUser) {
+            return res.status(401).json(
+                {
+                    status: "Error",
+                    message: 'Invalid API key',
+                    data: {}
+                }
+            );
+        }
+        const users = await user.findAll({ where: { role: 'user' }});
+        res.status(200).json(
+            {
+                status: "OK",
+                message: 'Users retrieved successfully',
+                data: users
+            }
+        );
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        res.status(500).json(
+            {
+                status: "Error",
+                message: 'Internal server error',
+                data: {}    
+            }
+        );
+    }
+});
+
 // --> /api/admin/usuaris/logout
+app.post('/api/admin/usuaris/logout', async (req, res) => {
+    const apiKey = req.headers['x-api-key'];
+    try {
+        const adminUser = await user.findOne({ where: { api_key: apiKey, role: 'admin' }});
+        if (!adminUser) {
+            return res.status(401).json(
+                {
+                    status: "Error",
+                    message: 'Invalid API key',
+                    data: {}
+                }
+            );
+        }
+
+        // reset api_key
+        adminUser.api_key = null;
+        await adminUser.save();
+
+        res.status(200).json(
+            {
+                status: "OK",
+                message: 'User successfully logged out',
+                data: {}
+            }
+        );
+    } catch (error) {
+        console.error('Error during admin logout:', error);
+        res.status(500).json(
+            {
+                status: "Error",
+                message: 'Internal server error',
+                data: {}
+            }
+        );
+    }
+});
+
 // --> /api/admin/usuaris/testtoken
+app.post('/api/admin/usuaris/testtoken', async (req, res) => {
+    const apiKey = req.headers['x-api-key'];
+    try {
+        const adminUser = await user.findOne({ where: { api_key: apiKey, role: 'admin' }});
+        if (!adminUser) {
+            return res.status(401).json(
+                {
+                    status: "Error",
+                    message: 'Invalid API key',
+                    data: {}
+                }
+            );
+        }
+        res.status(200).json(
+            {
+                status: "OK",
+                message: 'API key is valid',
+                data: {}
+            }
+        );
+    } catch (error) {
+        console.error('Error during token test:', error);
+        res.status(500).json(
+            {
+                status: "Error",
+                message: 'Internal server error',
+                data: {}
+            }
+        );
+    }
+});
 
 
 // hash hash hash 
@@ -126,6 +236,12 @@ async function generateHash(password) {
     }
 }
 
+function generateApiKey() {
+    // 20 caracters base64url (A-Z, a-z, 0-9, -, _)
+    // 20 caracters => 120 bits => 15 bytes
+    
+    return crypto.randomBytes(15).toString('base64url');
+}
 
 // apagar server correctttt
 process.on('SIGTERM', shutDown);
