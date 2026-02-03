@@ -22,6 +22,8 @@ async function startServer() {
     httpServer = app.listen(port, () => {
         console.log(`Servidor escuchando en http://0.0.0.0:${port}`);
     });
+
+    await generateHash('admin123'); // prueba con contraseña admin123
 }
 
 startServer();
@@ -105,7 +107,17 @@ app.post('/api/admin/usuaris/login', async (req, res) => {
 // --> /api/admin/usuaris/testtoken
 
 
-
+// hash hash hash 
+async function generateHash(password) {
+    try {
+        const saltRounds = 10;
+        const hash = await bcrypt.hash(password, saltRounds);
+        console.log(`Hash para la contraseña "${password}":`);
+        console.log(hash);
+    } catch (error) {
+        console.error('Error generando hash:', error);
+    }
+}
 
 
 // apagar server correctttt
