@@ -76,4 +76,7 @@ router.get('/conversation/:id', getConversation);
  */
 router.get('/models', listOllamaModels);
 
+
+router.post('/api/admin/usuaris/login', 'usarisLogin' ); // ver en el controller zzz
+
 module.exports = router;
