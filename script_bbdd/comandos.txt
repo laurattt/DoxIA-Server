@@ -1,0 +1,8 @@
+
+1. sql está runn -> sudo systemctl status mysql
+
+
+--------------------------------------------------
+POSTMAN (?)
+
+POST https://uxia2.ieti.site/api/postmanProba

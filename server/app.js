@@ -51,6 +51,8 @@ app.post('/api/postmanProba', (req, res) => {
 //////    END-POINTS    ////////
 ////////////////////////////////
 
+
+// --> /api/admin/usuaris/login
 app.post('/api/admin/usuaris/login', async (req, res) => {
     console.log(req.body);
     const { email, password } = req.body;
@@ -96,6 +98,13 @@ app.post('/api/admin/usuaris/login', async (req, res) => {
             });
     }
 });
+
+// --> /api/admin/usuaris/logout
+// --> /api/admin/usuaris/testtoken
+
+
+
+
 
 // apagar server correctttt
 process.on('SIGTERM', shutDown);
