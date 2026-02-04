@@ -66,160 +66,185 @@ app.post('/api/admin/usuaris/login', async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        const adminUser = await user.findOne({ where: { email, role: 'admin' }});
+        const adminUser = await user.findOne({
+            where: { email, role: 'admin' }
+        });
 
         if (!adminUser) {
-            return res.status(401).json(
-                { 
-                    status: "Error",
-                    message: 'Invalid credentials',
-                    data: {}
-                }
-            );
+            return res.status(401).json({
+                status: "Error",
+                message: 'Invalid credentials',
+                data: {}
+            });
         }
 
-        // checker pwd
-        const isMatch = await bcrypt.compare(password, adminUser.password);
+        const isMatch = await bcrypt.compare(
+            password,
+            adminUser.password_hash
+        );
 
-        if (isMatch) {
-            
-            // generar token si no existeix
-            if (!adminUser.api_key) {
-                const apiKey = generateApiKey();
-                adminUser.api_key = apiKey;
-                await adminUser.save();
-            }
-            res.status(200).json(
-                { 
-                    status: "OK",
-                    message: 'User successfully authenticated',
-                    data: {token: adminUser.api_key }
-                }
-            );
-        } else {
-            res.status(401).json(
-                { 
-                    status: "Error",
-                    message: 'Invalid credentials',
-                    data: {}
-                }
-            );
+        if (!isMatch) {
+            return res.status(401).json({
+                status: "Error",
+                message: 'Invalid credentials',
+                data: {}
+            });
         }
+
+        if (!adminUser.api_key) {
+            adminUser.api_key = generateApiKey();
+            await adminUser.save();
+        }
+
+        res.status(200).json({
+            status: "OK",
+            message: 'User successfully authenticated',
+            data: { token: adminUser.api_key }
+        });
 
     } catch (error) {
         console.error('Error during admin login:', error);
-        res.status(500).json(
-            { 
-                status: "Error",
-                message: 'Internal server error' 
-            });
+        res.status(500).json({
+            status: "Error",
+            message: 'Internal server error'
+        });
     }
 });
 
 // --> /api/admin/usuaris
 app.get('/api/admin/usuaris', async (req, res) => {
     const apiKey = req.headers['x-api-key'];
+
+    if (!apiKey) {
+        return res.status(401).json({
+            status: "Error",
+            message: "Missing API key",
+            data: {}
+        });
+    }
+
     try {
-        const adminUser = await user.findOne({ where: { api_key: apiKey, role: 'admin' }});
+        const adminUser = await user.findOne({
+            where: { api_key: apiKey, role: 'admin' }
+        });
+
         if (!adminUser) {
-            return res.status(401).json(
-                {
-                    status: "Error",
-                    message: 'Invalid API key',
-                    data: {}
-                }
-            );
+            return res.status(401).json({
+                status: "Error",
+                message: 'Invalid API key',
+                data: {}
+            });
         }
-        const users = await user.findAll({ where: { role: 'user' }});
-        res.status(200).json(
-            {
-                status: "OK",
-                message: 'Users retrieved successfully',
-                data: users
-            }
-        );
+
+        const users = await user.findAll({ where: { role: 'user' } });
+
+        res.status(200).json({
+            status: "OK",
+            message: 'Users retrieved successfully',
+            data: users
+        });
+
     } catch (error) {
         console.error('Error fetching users:', error);
-        res.status(500).json(
-            {
-                status: "Error",
-                message: 'Internal server error',
-                data: {}    
-            }
-        );
+        res.status(500).json({
+            status: "Error",
+            message: 'Internal server error',
+            data: {}
+        });
     }
 });
+
 
 // --> /api/admin/usuaris/logout
 app.post('/api/admin/usuaris/logout', async (req, res) => {
     const apiKey = req.headers['x-api-key'];
+
+    if (!apiKey) {
+        return res.status(401).json({
+            status: "Error",
+            message: "Missing API key",
+            data: {}
+        });
+    }
+
     try {
-        const adminUser = await user.findOne({ where: { api_key: apiKey, role: 'admin' }});
+        const adminUser = await user.findOne({
+            where: { api_key: apiKey, role: 'admin' }
+        });
+
         if (!adminUser) {
-            return res.status(401).json(
-                {
-                    status: "Error",
-                    message: 'Invalid API key',
-                    data: {}
-                }
-            );
+            return res.status(401).json({
+                status: "Error",
+                message: 'Invalid API key',
+                data: {}
+            });
         }
 
-        // reset api_key
+        // Invalidamos la API key
         adminUser.api_key = null;
         await adminUser.save();
 
-        res.status(200).json(
-            {
-                status: "OK",
-                message: 'User successfully logged out',
-                data: {}
-            }
-        );
+        res.status(200).json({
+            status: "OK",
+            message: 'Logout successful',
+            data: {}
+        });
+
     } catch (error) {
-        console.error('Error during admin logout:', error);
-        res.status(500).json(
-            {
-                status: "Error",
-                message: 'Internal server error',
-                data: {}
-            }
-        );
+        console.error('Error during logout:', error);
+        res.status(500).json({
+            status: "Error",
+            message: 'Internal server error',
+            data: {}
+        });
     }
 });
 
+
 // --> /api/admin/usuaris/testtoken
-app.post('/api/admin/usuaris/testtoken', async (req, res) => {
+app.get('/api/admin/usuaris/testtoken', async (req, res) => {
     const apiKey = req.headers['x-api-key'];
+
+    if (!apiKey) {
+        return res.status(401).json({
+            status: "Error",
+            message: "Missing API key",
+            data: {}
+        });
+    }
+
     try {
-        const adminUser = await user.findOne({ where: { api_key: apiKey, role: 'admin' }});
+        const adminUser = await user.findOne({
+            where: { api_key: apiKey, role: 'admin' }
+        });
+
         if (!adminUser) {
-            return res.status(401).json(
-                {
-                    status: "Error",
-                    message: 'Invalid API key',
-                    data: {}
-                }
-            );
-        }
-        res.status(200).json(
-            {
-                status: "OK",
-                message: 'API key is valid',
-                data: {}
-            }
-        );
-    } catch (error) {
-        console.error('Error during token test:', error);
-        res.status(500).json(
-            {
+            return res.status(401).json({
                 status: "Error",
-                message: 'Internal server error',
+                message: 'Invalid API key',
                 data: {}
+            });
+        }
+
+        res.status(200).json({
+            status: "OK",
+            message: 'Valid token',
+            data: {
+                admin_id: adminUser.id,
+                email: adminUser.email
             }
-        );
+        });
+
+    } catch (error) {
+        console.error('Error testing token:', error);
+        res.status(500).json({
+            status: "Error",
+            message: 'Internal server error',
+            data: {}
+        });
     }
 });
+
 
 
 // hash hash hash 

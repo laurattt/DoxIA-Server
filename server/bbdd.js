@@ -1,6 +1,4 @@
-const { Sequelize } = require('sequelize');
-const { DataTypes } = require('sequelize');
-
+const { Sequelize, DataTypes } = require('sequelize');
 
 const sequelize = new Sequelize(
     'uxia2',
@@ -8,14 +6,14 @@ const sequelize = new Sequelize(
     '4321',
     {
         host: 'localhost',
-        dialect: 'mysql', 
+        dialect: 'mysql',
+        logging: true,
         define: {
-            timestamps: false
-        },
-        logging: true
+            timestamps: false,
+            freezeTableName: true
+        }
     }
-)
-
+);
 
 ////////////////////////////
 //////    TABLAS     ///////
@@ -28,49 +26,49 @@ const user = sequelize.define('User', {
         primaryKey: true
     },
     nickname: {
-        type: DataTypes.STRING, 
-        allowNull: false, 
-        unique: true 
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true
     },
-   email: { 
-    type: DataTypes.STRING, 
-    allowNull: false, 
-    unique: true,
-    validate: {
-        isEmail: true}
+    email: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+        validate: { isEmail: true }
     },
     telefon: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true,
+        unique: true
     },
-    password_hash: { 
+    password_hash: {
         type: DataTypes.STRING,
         allowNull: false
     },
-    validat: { //verficaaar
-        type: DataTypes.BOOLEAN, 
-        defaultValue: false 
+    validat: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
     },
-    role: { 
-        type: DataTypes.ENUM('user', 'admin'), 
-        defaultValue: 'user', 
+    role: {
+        type: DataTypes.ENUM('user', 'admin'),
+        defaultValue: 'user',
         allowNull: false
     },
-    api_key: { 
-        type: DataTypes.STRING, 
-        unique: true 
+    api_key: {
+        type: DataTypes.STRING,
+        unique: true
     },
     createdAt: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW
     },
-    updatedAt:{
+    updatedAt: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW
     }
+}, {
+    tableName: 'users'
 });
-
 
 // -------------------------------------------
 
@@ -84,29 +82,31 @@ const request = sequelize.define('Request', {
         type: DataTypes.INTEGER,
         allowNull: false
     },
-    prompt: { 
-        type: DataTypes.TEXT, 
-        allowNull: false 
+    prompt: {
+        type: DataTypes.TEXT,
+        allowNull: false
     },
-    model: { 
-        type: DataTypes.STRING, 
-        defaultValue: 'qwen2.5vl:7b' // modelo ollama por mientras (?)
+    model: {
+        type: DataTypes.STRING,
+        defaultValue: 'qwen2.5vl:7b'
     },
     stream: {
         type: DataTypes.BOOLEAN,
         defaultValue: false
     },
-    status: { 
-        type: DataTypes.ENUM('pending', 'processing', 'completed', 'failed'), 
-        defaultValue: 'pending' 
+    status: {
+        type: DataTypes.ENUM('pending', 'processing', 'completed', 'failed'),
+        defaultValue: 'pending'
     },
-    processing_time: { 
-        type: DataTypes.FLOAT 
+    processing_time: {
+        type: DataTypes.FLOAT
     },
     createdAt: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW
     }
+}, {
+    tableName: 'requests'
 });
 
 // -------------------------------------------
@@ -121,25 +121,27 @@ const response = sequelize.define('Response', {
         type: DataTypes.INTEGER,
         allowNull: false
     },
-    description: { 
-        type: DataTypes.TEXT 
+    description: {
+        type: DataTypes.TEXT
     },
-    tags: { 
-        type: DataTypes.JSON 
+    tags: {
+        type: DataTypes.JSON
     },
-    model_used: { 
-        type: DataTypes.STRING 
+    model_used: {
+        type: DataTypes.STRING
     },
-    processing_time: { 
-        type: DataTypes.FLOAT 
+    processing_time: {
+        type: DataTypes.FLOAT
     },
-     createdAt: {
+    createdAt: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW
     }
+}, {
+    tableName: 'responses'
 });
 
-// -------------------------------------
+// -------------------------------------------
 
 const image = sequelize.define('Image', {
     image_id: {
@@ -148,15 +150,16 @@ const image = sequelize.define('Image', {
         primaryKey: true
     },
     request_id: {
-        type:DataTypes.INTEGER,
+        type: DataTypes.INTEGER,
         allowNull: false
     },
-    image_base64: { 
-        type: DataTypes.STRING, 
-        allowNull: false 
+    image_base64: {
+        type: DataTypes.STRING,
+        allowNull: false
     }
+}, {
+    tableName: 'images'
 });
-
 
 ////////////////////////////////
 //////    RELACIONES     ///////
@@ -165,13 +168,10 @@ const image = sequelize.define('Image', {
 user.hasMany(request, { foreignKey: 'user_id' });
 request.belongsTo(user, { foreignKey: 'user_id' });
 
-request.hasOne(response, {foreignKey: 'request_id' });
-response.belongsTo(request,{ foreignKey: 'request_id' });
+request.hasOne(response, { foreignKey: 'request_id' });
+response.belongsTo(request, { foreignKey: 'request_id' });
 
 request.hasOne(image, { foreignKey: 'request_id' });
 image.belongsTo(request, { foreignKey: 'request_id' });
 
-
-
 module.exports = { sequelize, user, request, response, image };
-
