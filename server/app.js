@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require('cors');
 const path = require("path");
 const bcrypt = require('bcrypt');
-const crypto = require('crypto');
+// const crypto = require('crypto');
 
 const { sequelize, user, request, response } = require('./bbdd');
 
@@ -236,9 +236,17 @@ async function generateHash(password) {
 
 function generateApiKey() {
     // 20 caracters base64url (A-Z, a-z, 0-9, -, _)
-    // 20 caracters => 120 bits => 15 bytes
     
-    return crypto.randomBytes(15).toString('base64url');
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+    let apiKey = '';
+    for (let i = 0; i < 20; i++) {
+        const randomIndex = Math.floor(Math.random() * characters.length);
+        apiKey += characters[randomIndex];
+    }
+    return apiKey;
+
+    // 20 caracters => 120 bits => 15 bytes
+    // return crypto.randomBytes(15).toString('base64url');
 }
 
 // apagar server correctttt
