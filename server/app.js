@@ -44,6 +44,10 @@ app.get('/postmanProba', (req, res) => {
     res.send('hola postman, hola hola hola');
 });
 
+app.get('/postmanProbaSegunda', (req, res) => {
+    res.send('soy la prueba numero dos, holaaaaa');
+});
+
 app.post('/api/postmanProba', (req, res) => {
     console.log(req.body);
     res.json({ message: 'mensaje test recibido', data: req.body });
