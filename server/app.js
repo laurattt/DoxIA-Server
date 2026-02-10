@@ -57,75 +57,45 @@ app.post('/api/postmanProba', (req, res) => {
 ////////////////////////////////
 
 
-// --> /api/admin/usuaris/login --> admin
+// --> /api/admin/usuaris/login 
 app.post('/api/admin/usuaris/login', async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        const adminUser = await user.findOne({
-            where: { email, role: 'admin' }
+        // busca user en bbdd
+        let existingUser = await user.findOne({
+            where: { email }
         });
 
-        if (!adminUser) {
-            return res.status(401).json({
-                status: "Error",
-                message: "Invalid credentials"
+        // registro automatico
+        if (!existingUser) {
+            existingUser = await user.create({
+                email,
+                password,
+                role: 'user',
+                api_key: null
             });
         }
-      
-        adminUser.api_key = null;   // INVALIDAMOS CUALQUIER SESION PREVIA
 
-        // GENERADOR NUEVO TOKEN
-        const newToken = generateApiKey(adminUser);
-        adminUser.api_key = newToken;
+        // if (existingUser.role !== 'admin') restriccion admin
 
-        await adminUser.save();
+        // invalid single session
+        existingUser.api_key = null;
+
+        // generar token
+        const token = generateApiKey(existingUser);
+        existingUser.api_key = token;
+
+        await existingUser.save();
 
         res.status(200).json({
             status: "OK",
             message: "Login successful",
-            data: { token: newToken }
-        });
-
-    } catch (error) {
-        res.status(500).json({
-            status: "Error",
-            message: "Internal server error"
-        });
-    }
-});
-
-// --> /api/register --> usuarios
-app.post('/api/register', async (req, res) => {
-    const { email, password } = req.body;
-
-    try {
-        const existingUser = await user.findOne({ where: { email } });
-        if (existingUser) {
-            return res.status(400).json({
-                status: "Error",
-                message: "User already exists"
-            });
-        }
-
-        const newUser = await user.create({
-            email,
-            password,    
-            role: 'user',
-            api_key: null
-        });
-
-        const token = generateApiKey(newUser);
-        newUser.api_key = token;
-        await newUser.save();
-
-        res.status(201).json({
-            status: "OK",
-            message: "User registered",
             data: { token }
         });
 
     } catch (error) {
+        console.error(error);
         res.status(500).json({
             status: "Error",
             message: "Internal server error"
@@ -134,8 +104,7 @@ app.post('/api/register', async (req, res) => {
 });
 
 
-
-// --> /api/admin/usuaris
+// --> /api/admin/usuaris     
 app.get('/api/admin/usuaris', async (req, res) => {
     const apiKey = req.headers['x-api-key'];
 
