@@ -1,8 +1,7 @@
 const express = require("express");
 const cors = require('cors');
+const jwt = require('jsonwebtoken')
 const path = require("path");
-const bcrypt = require('bcrypt');
-// const crypto = require('crypto');
 
 const { sequelize, user, request, response } = require('./bbdd');
 
@@ -11,7 +10,6 @@ const port = 3000;
 
 // MIDDLEWARES
 app.use(cors()); 
-
 app.use(express.json()); 
 app.use(express.urlencoded({ extended: true }));
 
@@ -61,7 +59,6 @@ app.post('/api/postmanProba', (req, res) => {
 
 // --> /api/admin/usuaris/login
 app.post('/api/admin/usuaris/login', async (req, res) => {
-    console.log(req.body);
     const { email, password } = req.body;
 
     try {
@@ -72,43 +69,32 @@ app.post('/api/admin/usuaris/login', async (req, res) => {
         if (!adminUser) {
             return res.status(401).json({
                 status: "Error",
-                message: 'Invalid credentials',
-                data: {}
+                message: "Invalid credentials"
             });
         }
+      
+        adminUser.api_key = null;   // INVALIDAMOS CUALQUIER SESION PREVIA
 
-        const isMatch = await bcrypt.compare(
-            password,
-            adminUser.password_hash
-        );
+        // GENERADOR NUEVO TOKEN
+        const newToken = generateApiKey(adminUser);
+        adminUser.api_key = newToken;
 
-        if (!isMatch) {
-            return res.status(401).json({
-                status: "Error",
-                message: 'Invalid credentials',
-                data: {}
-            });
-        }
-
-        if (!adminUser.api_key) {
-            adminUser.api_key = generateApiKey();
-            await adminUser.save();
-        }
+        await adminUser.save();
 
         res.status(200).json({
             status: "OK",
-            message: 'User successfully authenticated',
-            data: { token: adminUser.api_key }
+            message: "Login successful",
+            data: { token: newToken }
         });
 
     } catch (error) {
-        console.error('Error during admin login:', error);
         res.status(500).json({
             status: "Error",
-            message: 'Internal server error'
+            message: "Internal server error"
         });
     }
 });
+
 
 // --> /api/admin/usuaris
 app.get('/api/admin/usuaris', async (req, res) => {
@@ -244,20 +230,19 @@ app.get('/api/admin/usuaris/testtoken', async (req, res) => {
     }
 });
 
-
-function generateApiKey() {
-    // 20 caracters base64url (A-Z, a-z, 0-9, -, _)
-    
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
-    let apiKey = '';
-    for (let i = 0; i < 20; i++) {
-        const randomIndex = Math.floor(Math.random() * characters.length);
-        apiKey += characters[randomIndex];
-    }
-    return apiKey;
-
-    // 20 caracters => 120 bits => 15 bytes
-    // return crypto.randomBytes(15).toString('base64url');
+// generar token (zzzzzzzzzzzzzzz)
+function generateApiKey(user) {
+    return jwt.sign(
+        {
+            id: user.id,
+            email: user.email,
+            role: user.role
+        },
+        "CLAVE_SECRETA",
+        {
+            expiresIn: "1h"
+        }
+    );
 }
 
 // apagar server correctttt
