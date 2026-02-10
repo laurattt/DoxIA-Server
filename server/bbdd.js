@@ -27,7 +27,7 @@ const user = sequelize.define('User', {
     },
     nickname: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
         unique: true
     },
     email: {
@@ -38,12 +38,12 @@ const user = sequelize.define('User', {
     },
     telefon: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
         unique: true
     },
     password_hash: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
     },
     validat: {
         type: DataTypes.BOOLEAN,
