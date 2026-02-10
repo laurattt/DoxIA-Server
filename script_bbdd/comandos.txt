@@ -4,16 +4,65 @@ verif mysql
 sql está runn -> sudo systemctl status mysql
 
 --------------------------------------------------
-POSTMAN (?)
+POSTMAN (???????)
 
 POST https://uxia2.ieti.site/api/postmanProba
+
 GET http://uxia2.ieti.site/postmanProba
+GET http://uxia2.ieti.site/numDosPostmanProba
 
 ---------------------------------------------------
-run 
-    node app.js
+run -> node app.js
 
 ---------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 flujo cliente - servidor
 Flutter App <---HTTP---> Node.js Server <---Sequelize---> MySQL

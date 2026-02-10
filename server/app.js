@@ -24,7 +24,6 @@ async function startServer() {
         console.log(`Servidor escuchando en http://0.0.0.0:${port}`);
     });
 
-    //await generateHash('admin123'); // prueba con contraseña admin123
 }
 
 startServer();
@@ -245,19 +244,6 @@ app.get('/api/admin/usuaris/testtoken', async (req, res) => {
     }
 });
 
-
-
-// hash hash hash 
-async function generateHash(password) {
-    try {
-        const saltRounds = 10;
-        const hash = await bcrypt.hash(password, saltRounds);
-        console.log(`Hash para la contraseña "${password}":`);
-        console.log(hash);
-    } catch (error) {
-        console.error('Error generando hash:', error);
-    }
-}
 
 function generateApiKey() {
     // 20 caracters base64url (A-Z, a-z, 0-9, -, _)
