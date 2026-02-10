@@ -57,7 +57,7 @@ app.post('/api/postmanProba', (req, res) => {
 ////////////////////////////////
 
 
-// --> /api/admin/usuaris/login
+// --> /api/admin/usuaris/login --> admin
 app.post('/api/admin/usuaris/login', async (req, res) => {
     const { email, password } = req.body;
 
@@ -94,6 +94,45 @@ app.post('/api/admin/usuaris/login', async (req, res) => {
         });
     }
 });
+
+// --> /api/register --> usuarios
+app.post('/api/register', async (req, res) => {
+    const { email, password } = req.body;
+
+    try {
+        const existingUser = await user.findOne({ where: { email } });
+        if (existingUser) {
+            return res.status(400).json({
+                status: "Error",
+                message: "User already exists"
+            });
+        }
+
+        const newUser = await user.create({
+            email,
+            password,    
+            role: 'user',
+            api_key: null
+        });
+
+        const token = generateApiKey(newUser);
+        newUser.api_key = token;
+        await newUser.save();
+
+        res.status(201).json({
+            status: "OK",
+            message: "User registered",
+            data: { token }
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            status: "Error",
+            message: "Internal server error"
+        });
+    }
+});
+
 
 
 // --> /api/admin/usuaris
