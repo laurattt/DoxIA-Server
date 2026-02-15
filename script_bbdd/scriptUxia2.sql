@@ -1,13 +1,13 @@
 -- SCRIPT BBDD UXIA2
 
-CREATE DATABASE uxia2;
+CREATE DATABASE uxiaG2;
 
 CREATE TABLE users (
   user_id INT PRIMARY KEY AUTO_INCREMENT,
-  nickname VARCHAR(100) UNIQUE NOT NULL,
-  email VARCHAR(255) UNIQUE NOT NULL,
-  telefon VARCHAR(20) UNIQUE NOT NULL,
-  password_hash VARCHAR(255), -- pa admins 
+  nickname VARCHAR(100) DEFAULT 'nicknameUser' ,
+  email VARCHAR(255) DEFAULT 'user@example.com',
+  telefon VARCHAR(20) DEFAULT '604556677',
+  password VARCHAR(255), -- pa admins 
   validat BOOLEAN DEFAULT FALSE,
   role ENUM('user', 'admin') DEFAULT 'user' NOT NULL,
   api_key VARCHAR(255) UNIQUE, -- token de acceso 

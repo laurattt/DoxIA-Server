@@ -1,7 +1,7 @@
 const { Sequelize, DataTypes } = require('sequelize');
 
 const sequelize = new Sequelize(
-    'uxia2',
+    'uxiaG2',
     'uxia2User',
     '4321',
     {
