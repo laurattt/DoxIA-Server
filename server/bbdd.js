@@ -1,9 +1,9 @@
 const { Sequelize, DataTypes } = require('sequelize');
 
 const sequelize = new Sequelize(
-    'uxia2',
-    'uxia2User',
-    '4321',
+    'uxiaG2',
+    'uxiaG2User',
+    '1234',
     {
         host: 'localhost',
         dialect: 'mysql',
