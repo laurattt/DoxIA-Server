@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require('cors');
+const multer = require('multer');
 const jwt = require('jsonwebtoken')
 const path = require("path");
 
@@ -57,7 +58,7 @@ app.post('/api/postmanProba', (req, res) => {
 ////////////////////////////////
 
 
-// --> /api/admin/usuaris/login 
+// --> POST   /api/admin/usuaris/login 
 app.post('/api/admin/usuaris/login', async (req, res) => {
     const { email, password } = req.body;
 
@@ -104,7 +105,7 @@ app.post('/api/admin/usuaris/login', async (req, res) => {
 });
 
 
-// --> /api/admin/usuaris     
+// --> GET   /api/admin/usuaris     
 app.get('/api/admin/usuaris', async (req, res) => {
     const apiKey = req.headers['x-api-key'];
 
@@ -148,7 +149,7 @@ app.get('/api/admin/usuaris', async (req, res) => {
 });
 
 
-// --> /api/admin/usuaris/logout
+// --> POST  /api/admin/usuaris/logout
 app.post('/api/admin/usuaris/logout', async (req, res) => {
     const apiKey = req.headers['x-api-key'];
 
@@ -194,7 +195,7 @@ app.post('/api/admin/usuaris/logout', async (req, res) => {
 });
 
 
-// --> /api/admin/usuaris/testtoken
+// --> GET  /api/admin/usuaris/testtoken
 app.get('/api/admin/usuaris/testtoken', async (req, res) => {
     const apiKey = req.headers['x-api-key'];
 
@@ -252,6 +253,147 @@ function generateApiKey(user) {
         }
     );
 }
+
+// POST  /api/analitzar-imatge + queryOllama -> rtaaa ia
+
+const PROMPT =`Analyze the provided image.
+
+        Return ONLY a valid JSON object with the exact following structure:
+
+        {
+        "description": "Clear and detailed description of what appears in the image",
+        "tags": ["tag1", "tag2", "tag3", "tag4"]
+        }
+
+        Rules:
+        - The description must be 2 to 4 sentences long.
+        - Tags must be single keywords in lowercase.
+        - Tags should describe objects, environment, colors, and overall context.
+        - Do not include any text before or after the JSON.
+        - Do not use markdown formatting.
+        - Ensure the output is valid JSON.`;
+
+async function queryOllama(base64Image, prompt) {
+
+    const requestBody = {
+        model: `qwen2.5vl:7b`,
+        prompt: prompt,
+        images: [base64Image],
+        stream: false
+    };
+
+    try {
+        const response = await fetch(`${`http://127.0.0.1:11434/api`}/generate`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestBody)
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP Error: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (!data || !data.response) {
+            throw new Error('Unexpected Ollama response format');
+        }
+
+        return data.response;
+
+    } catch (error) {
+        console.error('Ollama request error:', error);
+        return null;
+    }
+}
+
+
+const upload = multer({ storage: multer.memoryStorage() });
+app.post('/api/analitzar-imatge', upload.single('photo'), async (req, res) => {
+
+    if (!req.file) {
+        return res.status(400).json({
+            status: "Error",
+            message: "No image uploaded"
+        });
+    }
+
+    const startTime = Date.now();
+
+    try {
+
+        // se envia request y queda en bbdddddd
+        const newRequest = await request.create({
+            user_id: 1, 
+            prompt: PROMPT,
+            model: "qwen2.5vl:7b",
+            stream: false,
+            status: "pending"
+        });
+
+        // imagen a base64
+        const base64Image = req.file.buffer.toString('base64');
+
+        await image.create({ //guardar imagen en bbdddd
+            request_id: newRequest.request_id,
+            image_base64: base64Image
+        });
+
+        newRequest.status = "processing"; // estado cambiado
+        await newRequest.save();
+
+        // analisis con ollama
+        const ollamaResponse = await queryOllama(base64Image, PROMPT);
+
+        if (!ollamaResponse) {
+            newRequest.status = "failed";
+            await newRequest.save();
+
+            return res.status(500).json({
+                status: "Error",
+                message: "Ollama failed"
+            });
+        }
+
+        // controla posibles errores (json mal formado)
+        const jsonStart = ollamaResponse.indexOf('{');
+        const jsonEnd = ollamaResponse.lastIndexOf('}') + 1;
+        const cleanJson = ollamaResponse.slice(jsonStart, jsonEnd);
+        const parsed = JSON.parse(cleanJson);
+
+        const processingTime = (Date.now() - startTime) / 1000;
+
+        // respuesta en bbbddddd
+        await response.create({
+            request_id: newRequest.request_id,
+            description: parsed.description,
+            tags: parsed.tags,
+            model_used: "qwen2.5vl:7b",
+            processing_time: processingTime
+        });
+
+        newRequest.status = "completed"; //estado completado :D
+        newRequest.processing_time = processingTime;
+        await newRequest.save();
+
+        res.status(200).json({
+            status: "OK",
+            description: parsed.description,
+            tags: parsed.tags
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            status: "Error",
+            message: "Internal server error"
+        });
+    }
+});
 
 // apagar server correctttt
 process.on('SIGTERM', shutDown);
