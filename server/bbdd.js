@@ -34,13 +34,11 @@ const user = sequelize.define('User', {
     email: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true,
         validate: { isEmail: true }
     },
     telefon: {
         type: DataTypes.STRING,
         allowNull: true,
-        unique: true,
         defaultValue: '604556677'
     },
     password_hash: {
