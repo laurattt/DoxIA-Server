@@ -41,7 +41,7 @@ const user = sequelize.define('User', {
         allowNull: true,
         defaultValue: '604556677'
     },
-    password_hash: {
+    password: {
         type: DataTypes.STRING,
         allowNull: true,
         defaultValue: 'passwordHash'
