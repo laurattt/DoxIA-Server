@@ -1,13 +1,13 @@
 const { Sequelize, DataTypes } = require('sequelize');
 
 const sequelize = new Sequelize(
-    'uxiaG2',
+    'uxia2',
     'uxia2User',
     '4321',
     {
         host: 'localhost',
         dialect: 'mysql',
-        logging: false,
+        logging: true,
         define: {
             timestamps: false,
             freezeTableName: true
