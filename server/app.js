@@ -5,7 +5,7 @@ const fs = require('fs').promises;
 const jwt = require('jsonwebtoken')
 const path = require("path");
 
-const { sequelize, user, request, response } = require('./bbdd');
+const { sequelize, user, request, response, image } = require('./bbdd');
 
 const app = express();
 const port = 3000;
