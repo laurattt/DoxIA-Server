@@ -490,6 +490,8 @@ app.post('/api/analitzar-imatge', upload.single('photo'), async (req, res) => {
         });
     }
 });
+// lalalal commit extra 
+
 
 ////////////////////////////////
 //////      PRUEBAS     ////////
