@@ -322,49 +322,35 @@ async function imageToBase64(imagePath) {
 
 
 app.post('/api/pruebaImg', async (req, res) => {
-    // Ruta absoluta que me indicaste
-    const imagesFolderPath = '../imgProva';
+    const imagesFolderPath = path.join(__dirname, '../imgProva');
     const resultados = [];
 
     try {
-        // 1. Validar que la carpeta principal existe
-        await fs.access(imagesFolderPath);
-        
-        // 2. Leer los directorios de animales (perro, gato, etc.)
-        const animalDirectories = await fs.readdir(imagesFolderPath);
+        console.log("Leyendo carpeta:", imagesFolderPath);
+        const files = await fs.readdir(imagesFolderPath);
 
-        for (const animalDir of animalDirectories) {
-            const animalDirPath = path.join(imagesFolderPath, animalDir);
-            const stats = await fs.stat(animalDirPath);
-            
-            if (!stats.isDirectory()) continue;
+        for (const file of files) {
+            const filePath = path.join(imagesFolderPath, file);
+            const stats = await fs.stat(filePath);
 
-            // 3. Leer las imágenes dentro de cada carpeta de animal
-            const imageFiles = await fs.readdir(animalDirPath);
-
-            for (const imageFile of imageFiles) {
-                // Filtramos para procesar solo imágenes (jpg, png, webp)
-                if (!/\.(jpg|jpeg|png|webp)$/i.test(imageFile)) continue;
-
-                const imagePath = path.join(animalDirPath, imageFile);
-                const base64String = await imageToBase64(imagePath);
+            if (stats.isFile() && /\.(jpg|jpeg|png|webp)$/i.test(file)) { // verif que sea img 
+                
+                const base64String = await imageToBase64(filePath);
 
                 if (base64String) {
-                    console.log(`Enviant a Ollama: ${imageFile}...`);
+                    console.log(`Procesando imagen: ${file}`);
                     const prompt = "Identifica quin tipus d'animal apareix a la imatge";
                     
                     const response = await queryOllamaProva(base64String, prompt);
                     
                     resultados.push({
-                        fitxer: imageFile,
-                        carpeta: animalDir,
-                        resposta: response || "Sense resposta"
+                        fitxer: file,
+                        resposta: response || "Sin respuesta de Ollama"
                     });
                 }
             }
         }
 
-        // IMPORTANTE: Enviar la respuesta al finalizar
         res.json({
             success: true,
             total_processades: resultados.length,
@@ -372,7 +358,7 @@ app.post('/api/pruebaImg', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Error en el proceso:', error);
+        console.error("Error:", error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
