@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require('cors');
 const multer = require('multer');
+const fs = require('fs').promises;
 const jwt = require('jsonwebtoken')
 const path = require("path");
 
@@ -258,7 +259,126 @@ function generateApiKey(user) {
     );
 }
 
-// POST  /api/analitzar-imatge + queryOllama -> rtaaa ia
+// POST  /api/analitzar-imatge + queryOllama -> PRUEBAAAAAAAAAAAAAAAAAAAA
+
+async function queryOllamaProva(base64Image, prompt){
+    
+const requestBody = {
+        model: `qwen2.5vl:7b`,
+        prompt: prompt,
+        images: [base64Image],
+        stream: false
+    };
+
+    try {
+        console.log('Enviant petició a Ollama...');
+        console.log(`URL: ${`http://192.168.1.24:11434/api`}/generate`);
+        console.log('Model:', `qwen2.5vl:7b`);
+        
+        const response = await fetch(`${`http://192.168.1.24:11434/api`}/generate`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestBody)
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error HTTP: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        
+        // Depuració de la resposta
+        console.log('Resposta completa d\'Ollama:', JSON.stringify(data, null, 2));
+        
+        // Verificar si tenim una resposta vàlida
+        if (!data || !data.response) {
+            throw new Error('La resposta d\'Ollama no té el format esperat');
+        }
+
+        return data.response;
+    } catch (error) {
+        console.error('Error detallat en la petició a Ollama:', error);
+        console.error('Detalls adicionals:', {
+            url: `${`http://192.168.1.24:11434/api`}/generate`,
+            model: `qwen2.5vl:7b`,
+            promptLength: prompt.length,
+            imageLength: base64Image.length
+        });
+        return null;
+    }
+}
+
+async function imageToBase64(imagePath) {
+    try {
+        const data = await fs.readFile(imagePath);
+        return Buffer.from(data).toString('base64');
+    } catch (error) {
+        console.error(`Error al llegir o convertir la imatge ${imagePath}:`, error.message);
+        return null;
+    }
+}    
+
+
+app.post('/api/pruebaImg', async (req, res) => {
+    // Ruta absoluta que me indicaste
+    const imagesFolderPath = '/home/super/Documents/GitHub/UXIA-Server/imgProva';
+    const resultados = [];
+
+    try {
+        // 1. Validar que la carpeta principal existe
+        await fs.access(imagesFolderPath);
+        
+        // 2. Leer los directorios de animales (perro, gato, etc.)
+        const animalDirectories = await fs.readdir(imagesFolderPath);
+
+        for (const animalDir of animalDirectories) {
+            const animalDirPath = path.join(imagesFolderPath, animalDir);
+            const stats = await fs.stat(animalDirPath);
+            
+            if (!stats.isDirectory()) continue;
+
+            // 3. Leer las imágenes dentro de cada carpeta de animal
+            const imageFiles = await fs.readdir(animalDirPath);
+
+            for (const imageFile of imageFiles) {
+                // Filtramos para procesar solo imágenes (jpg, png, webp)
+                if (!/\.(jpg|jpeg|png|webp)$/i.test(imageFile)) continue;
+
+                const imagePath = path.join(animalDirPath, imageFile);
+                const base64String = await imageToBase64(imagePath);
+
+                if (base64String) {
+                    console.log(`Enviant a Ollama: ${imageFile}...`);
+                    const prompt = "Identifica quin tipus d'animal apareix a la imatge";
+                    
+                    const response = await queryOllamaProva(base64String, prompt);
+                    
+                    resultados.push({
+                        fitxer: imageFile,
+                        carpeta: animalDir,
+                        resposta: response || "Sense resposta"
+                    });
+                }
+            }
+        }
+
+        // IMPORTANTE: Enviar la respuesta al finalizar
+        res.json({
+            success: true,
+            total_processades: resultados.length,
+            detalls: resultados
+        });
+
+    } catch (error) {
+        console.error('Error en el proceso:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+
+// POST  /api/analitzar-imatge + queryOllama -> query ollama + prompt
 
 const PROMPT =`Analyze the provided image.
 
