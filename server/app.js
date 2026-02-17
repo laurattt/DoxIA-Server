@@ -323,7 +323,7 @@ async function imageToBase64(imagePath) {
 
 app.post('/api/pruebaImg', async (req, res) => {
     // Ruta absoluta que me indicaste
-    const imagesFolderPath = '../../../imgProva';
+    const imagesFolderPath = '../imgProva';
     const resultados = [];
 
     try {
