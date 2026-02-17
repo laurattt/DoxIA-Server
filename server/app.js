@@ -247,7 +247,7 @@ app.get('/api/admin/usuaris/testtoken', async (req, res) => {
 // --> POST /api/admin/usuaris/add
 app.post('/api/admin/usuaris/add', async (req, res) => {
     const apiKey = req.headers['x-api-key'];
-    const { userId, nickname, email } = req.body;
+    const { user_id, nickname, email } = req.body;
 
     if (!apiKey) {
         return res.status(401).json({
@@ -270,12 +270,17 @@ app.post('/api/admin/usuaris/add', async (req, res) => {
             });
         }
 
-        await user.create({
-            user_id: userId,
+        const newUser = await user.create({
+            user_id: parseInt(user_id),
             nickname: nickname,
             email: email,
-            role: 'user'
-        })
+            role: 'user',
+            api_key: null,
+        });
+        const token = generateApiKey(newUser);
+        newUser.api_key = token;
+        
+        await newUser.save();
     } catch (error) {
         console.error('Error adding user:', error);
         res.status(500).json({
@@ -289,7 +294,7 @@ app.post('/api/admin/usuaris/add', async (req, res) => {
 // --> POST /api/admin/usuaris/remove
 app.post('/api/admin/usuaris/remove', async (req, res) => {
     const apiKey = req.headers['x-api-key'];
-    const { userIdToRemove } = req.body;
+    const { user_id } = req.body;
 
     if (!apiKey) {
         return res.status(401).json({
@@ -314,7 +319,7 @@ app.post('/api/admin/usuaris/remove', async (req, res) => {
 
         await user.destroy({
             where: {
-                user_id: userIdToRemove.toString(),
+                user_id: parseInt(user_id),
             },
         });
 
