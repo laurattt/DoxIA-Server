@@ -46,6 +46,10 @@ app.get('/numDosPostmanProba', (req, res) => {
     res.send('prueba num doooooos, hola');
 });
 
+app.get('/PostmanProbaNewNew', (req, res) => {
+    res.send('prueba num tres (actualizado?), hola');
+});
+
 
 app.post('/api/postmanProba', (req, res) => {
     console.log(req.body);
