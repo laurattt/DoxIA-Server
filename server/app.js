@@ -287,7 +287,7 @@ async function queryOllama(base64Image, prompt) {
     };
 
     try {
-        const response = await fetch(`${`http://127.0.0.1:11435/api`}/generate`, {
+        const response = await fetch(`${`http://192.168.1.24:11434/api`}/generate`, { // es correcta esta ip? 
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
