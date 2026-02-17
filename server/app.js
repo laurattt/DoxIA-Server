@@ -489,7 +489,9 @@ app.post('/api/analitzar-imatge', upload.single('photo'), async (req, res) => {
 ////////////////////////////////
 //////      PRUEBAS     ////////
 ////////////////////////////////
-
+app.get('/api/status', (req, res) => {
+    res.status(200).json({ status: "OK", message: "Servidor funcionant correctament" });
+});
 
 async function queryOllamaProva(base64Image, prompt){
     
