@@ -244,6 +244,90 @@ app.get('/api/admin/usuaris/testtoken', async (req, res) => {
     }
 });
 
+// --> POST /api/admin/usuaris/add
+app.post('/api/admin/usuaris/add', async (req, res) => {
+    const apiKey = req.headers['x-api-key'];
+    const { userId, nickname, email } = req.body;
+
+    if (!apiKey) {
+        return res.status(401).json({
+            status: "Error",
+            message: "Missing API key",
+            data: {}
+        });
+    }
+
+    try {
+        const adminUser = await user.findOne({
+            where: { api_key: apiKey, role: 'admin' }
+        });
+
+        if (!adminUser) {
+            return res.status(401).json({
+                status: "Error",
+                message: 'Invalid API key',
+                data: {}
+            });
+        }
+
+        await user.create({
+            user_id: userId,
+            nickname: nickname,
+            email: email,
+            role: 'user'
+        })
+    } catch (error) {
+        console.error('Error adding user:', error);
+        res.status(500).json({
+            status: "Error",
+            message: 'Internal server error',
+            data: {}
+        });
+    }
+});
+
+// --> POST /api/admin/usuaris/remove
+app.post('/api/admin/usuaris/remove', async (req, res) => {
+    const apiKey = req.headers['x-api-key'];
+    const { userIdToRemove } = req.body;
+
+    if (!apiKey) {
+        return res.status(401).json({
+            status: "Error",
+            message: "Missing API key",
+            data: {}
+        });
+    }
+
+    try {
+        const adminUser = await user.findOne({
+            where: { api_key: apiKey, role: 'admin' }
+        });
+
+        if (!adminUser) {
+            return res.status(401).json({
+                status: "Error",
+                message: 'Invalid API key',
+                data: {}
+            });
+        }
+
+        await user.destroy({
+            where: {
+                user_id: userIdToRemove.toString(),
+            },
+        });
+
+    } catch (error) {
+        console.error('Error adding user:', error);
+        res.status(500).json({
+            status: "Error",
+            message: 'Internal server error',
+            data: {}
+        });
+    }
+})
+
 // generar token (zzzzzzzzzzzzzzz)
 function generateApiKey(user) {
     return jwt.sign(
