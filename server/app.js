@@ -341,7 +341,7 @@ const PROMPT =`Analyze the provided image.
 
         Rules:
         - The description must be 2 to 4 sentences long.
-        - The quantity of the tags must be only four
+        - The quantity of the tags must be only four without repeats 
         - Tags must be single keywords in lowercase.
         - Tags should describe objects, environment, colors, and overall context.
         - Do not include any text before or after the JSON.
