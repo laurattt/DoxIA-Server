@@ -38,26 +38,6 @@ async function bbddChecker() {
   }
 }
 
-// prueba postman (?)
-app.get('/postmanProba', (req, res) => {
-    res.send('hola postman, hola hola hola');
-});
-
-app.get('/numDosPostmanProba', (req, res) => {
-    res.send('prueba num doooooos, hola');
-});
-
-app.get('/PostmanProbaNewNew', (req, res) => {
-    res.send('prueba num tres (actualizado?), hola');
-});
-
-
-app.post('/api/postmanProba', (req, res) => {
-    console.log(req.body);
-    res.json({ message: 'mensaje test recibido', data: req.body });
-});
-
-
 ////////////////////////////////
 //////    END-POINTS    ////////
 ////////////////////////////////
@@ -361,6 +341,7 @@ const PROMPT =`Analyze the provided image.
 
         Rules:
         - The description must be 2 to 4 sentences long.
+        - The quantity of the tags must be only four
         - Tags must be single keywords in lowercase.
         - Tags should describe objects, environment, colors, and overall context.
         - Do not include any text before or after the JSON.
@@ -497,9 +478,32 @@ app.post('/api/analitzar-imatge', upload.single('photo'), async (req, res) => {
 ////////////////////////////////
 //////      PRUEBAS     ////////
 ////////////////////////////////
+
+// server check
 app.get('/api/status', (req, res) => {
     res.status(200).json({ status: "OK", message: "Servidor funcionant correctament" });
 });
+
+
+// prueba postman (?)
+app.get('/postmanProba', (req, res) => {
+    res.send('hola postman, hola hola hola');
+});
+
+app.get('/numDosPostmanProba', (req, res) => {
+    res.send('prueba num doooooos, hola');
+});
+
+app.get('/PostmanProbaNewNew', (req, res) => {
+    res.send('prueba num tres (actualizado?), hola');
+});
+
+
+app.post('/api/postmanProba', (req, res) => {
+    console.log(req.body);
+    res.json({ message: 'mensaje test recibido', data: req.body });
+});
+
 
 async function queryOllamaProva(base64Image, prompt){
     
