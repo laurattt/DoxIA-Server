@@ -365,7 +365,8 @@ const PROMPT =`Analyze the provided image.
         - Tags should describe objects, environment, colors, and overall context.
         - Do not include any text before or after the JSON.
         - Do not use markdown formatting.
-        - Ensure the output is valid JSON.`;
+        - Ensure the output is valid JSON.
+        - The language of the answer must be Catalan`; 
 
 async function queryOllama(base64Image, prompt) {
 
