@@ -89,28 +89,39 @@ app.post('/api/admin/usuaris/login', async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        // busca user en bbdd
         const adminUser = await user.findOne({
             where: { email, role: 'admin' }
         });
 
-        // desvalidar + generar token
-        if (password === adminUser.password){
-            adminUser.api_key = null;
+        if (!adminUser) {
+            return res.status(401).json({
+                status: "Error",
+                message: "Usuario no encontrado o no es administrador"
+            });
+        }
+
+        if (password === adminUser.password) {
+            
             const token = generateApiKey(adminUser);
             adminUser.api_key = token;
-        }        
 
-        await adminUser.save();
+            await adminUser.save();
 
-        res.status(200).json({
-            status: "OK",
-            message: "Admin correct login",
-            data: { token }
-        });
+            return res.status(200).json({
+                status: "OK",
+                message: "Admin login correcto",
+                data: { token }
+            });
+
+        } else {
+            return res.status(401).json({
+                status: "Error",
+                message: "Contraseña incorrecta"
+            });
+        }
 
     } catch (error) {
-        console.error(error);
+        console.error("Error en el login:", error);
         res.status(500).json({
             status: "Error",
             message: "Internal server error"
