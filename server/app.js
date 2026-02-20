@@ -42,10 +42,9 @@ async function bbddChecker() {
 //////    END-POINTS    ////////
 ////////////////////////////////
 
-
-// --> POST   /api/admin/usuaris/login 
-app.post('/api/admin/usuaris/login', async (req, res) => {
-    const { email, password } = req.body;
+// --> POST    /api/usuaris/registrar               -> Usuario se registra y envío SMS bla bla
+app.post('/api/usuaris/registrar ', async (req, res) => {
+    const { email, password } = req.body;  // aqui mi apikey será el sms? solo app 
 
     try {
         // busca user en bbdd
@@ -64,6 +63,41 @@ app.post('/api/admin/usuaris/login', async (req, res) => {
         }
 
         // if (existingUser.role !== 'admin') restriccion admin
+
+        // invalid single session
+        existingUser.api_key = null;
+
+        // generar token
+        const token = generateApiKey(existingUser);
+        existingUser.api_key = token;
+
+        await existingUser.save();
+
+        res.status(200).json({
+            status: "OK",
+            message: "Login successful",
+            data: { token }
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            status: "Error",
+            message: "Internal server error"
+        });
+    }
+});
+
+
+// --> POST   /api/admin/usuaris/login 
+app.post('/api/admin/usuaris/login', async (req, res) => {
+    const { email, password } = req.body;
+
+    try {
+        // busca user en bbdd
+        const existingUser = await user.findOne({
+            where: { email, role: 'admin' }
+        });
 
         // invalid single session
         existingUser.api_key = null;
