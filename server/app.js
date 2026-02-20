@@ -42,9 +42,9 @@ async function bbddChecker() {
 //////    END-POINTS    ////////
 ////////////////////////////////
 
-// --> POST    /api/usuaris/registrar               ---> Usuario se registra y envío SMS bla bla
-app.post('/api/usuaris/registrar ', async (req, res) => {
-    const { email, password } = req.body;  // aqui mi apikey será el sms? solo app verif
+// --> POST    /api/usuaris/registrar    
+app.post('/api/usuaris/registrar ', async (req, res) => { // solo registro y enviar sms (aún no se válida)
+    const { email, password } = req.body;  // app usa code + apikey
 
     try {
         // user existe?
@@ -62,10 +62,11 @@ app.post('/api/usuaris/registrar ', async (req, res) => {
             });
         }
 
+        const sms = null;
         // invalid + generar token --> si user app usa token agg column para code validado etc etc
-        existingUser.api_key = null;
-        const token = generateApiKey(existingUser);
-        existingUser.api_key = token;
+        //existingUser.api_key = null;
+        //const token = generateApiKey(existingUser);
+        //existingUser.api_key = token;
 
         await existingUser.save();
 
@@ -84,6 +85,9 @@ app.post('/api/usuaris/registrar ', async (req, res) => {
     }
 });
 
+// --> POST     /api/usuaris/registrar/validar
+
+
 // --> POST   /api/admin/usuaris/login 
 app.post('/api/admin/usuaris/login', async (req, res) => {
     const { email, password } = req.body;
@@ -96,12 +100,12 @@ app.post('/api/admin/usuaris/login', async (req, res) => {
         if (!adminUser) {
             return res.status(401).json({
                 status: "Error",
-                message: "Usuario no encontrado o no es administrador"
+                message: "User not found or not be admin"
             });
         }
 
         if (password === adminUser.password) {
-            
+            adminUser.api_key = null;
             const token = generateApiKey(adminUser);
             adminUser.api_key = token;
 
@@ -109,14 +113,14 @@ app.post('/api/admin/usuaris/login', async (req, res) => {
 
             return res.status(200).json({
                 status: "OK",
-                message: "Admin login correcto",
+                message: "Admin correct login",
                 data: { token }
             });
 
         } else {
             return res.status(401).json({
                 status: "Error",
-                message: "Contraseña incorrecta"
+                message: "Wrong password"
             });
         }
 

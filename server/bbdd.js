@@ -66,6 +66,10 @@ const user = sequelize.define('User', {
     updatedAt: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW
+    },
+    sms: {
+        type: DataTypes.INTEGER,
+        defaultValue: '1234'
     }
 }, {
     tableName: 'users'
