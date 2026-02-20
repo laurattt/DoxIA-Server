@@ -42,13 +42,13 @@ async function bbddChecker() {
 //////    END-POINTS    ////////
 ////////////////////////////////
 
-// --> POST    /api/usuaris/registrar               -> Usuario se registra y envío SMS bla bla
+// --> POST    /api/usuaris/registrar               ---> Usuario se registra y envío SMS bla bla
 app.post('/api/usuaris/registrar ', async (req, res) => {
-    const { email, password } = req.body;  // aqui mi apikey será el sms? solo app 
+    const { email, password } = req.body;  // aqui mi apikey será el sms? solo app verif
 
     try {
-        // busca user en bbdd
-        let existingUser = await user.findOne({
+        // user existe?
+        const existingUser = await user.findOne({
             where: { email }
         });
 
@@ -62,12 +62,8 @@ app.post('/api/usuaris/registrar ', async (req, res) => {
             });
         }
 
-        // if (existingUser.role !== 'admin') restriccion admin
-
-        // invalid single session
+        // invalid + generar token --> si user app usa token agg column para code validado etc etc
         existingUser.api_key = null;
-
-        // generar token
         const token = generateApiKey(existingUser);
         existingUser.api_key = token;
 
@@ -88,29 +84,28 @@ app.post('/api/usuaris/registrar ', async (req, res) => {
     }
 });
 
-
 // --> POST   /api/admin/usuaris/login 
 app.post('/api/admin/usuaris/login', async (req, res) => {
     const { email, password } = req.body;
 
     try {
         // busca user en bbdd
-        const existingUser = await user.findOne({
+        const adminUser = await user.findOne({
             where: { email, role: 'admin' }
         });
 
-        // invalid single session
-        existingUser.api_key = null;
+        // desvalidar + generar token
+        if (password === adminUser.password){
+            adminUser.api_key = null;
+            const token = generateApiKey(adminUser);
+            adminUser.api_key = token;
+        }        
 
-        // generar token
-        const token = generateApiKey(existingUser);
-        existingUser.api_key = token;
-
-        await existingUser.save();
+        await adminUser.save();
 
         res.status(200).json({
             status: "OK",
-            message: "Login successful",
+            message: "Admin correct login",
             data: { token }
         });
 
