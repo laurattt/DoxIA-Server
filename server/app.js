@@ -62,7 +62,12 @@ app.post('/api/usuaris/registrar ', async (req, res) => { // solo registro y env
             });
         }
 
-        const sms = null;
+
+        // funcion para generar sms y enviar aqui 
+
+        const sms = '1234';
+
+
         // invalid + generar token --> si user app usa token agg column para code validado etc etc
         //existingUser.api_key = null;
         //const token = generateApiKey(existingUser);
@@ -73,7 +78,7 @@ app.post('/api/usuaris/registrar ', async (req, res) => { // solo registro y env
         res.status(200).json({
             status: "OK",
             message: "Login successful",
-            data: { token }
+            data: { sms }
         });
 
     } catch (error) {
@@ -84,6 +89,20 @@ app.post('/api/usuaris/registrar ', async (req, res) => { // solo registro y env
         });
     }
 });
+
+function generateSmsApp(user){
+    // curl "192.168.1.16:8000/api/sendsms/?api_token=xxxYYYzzz&username=ams23&text=prova+de+missatge+text+SMS&receiver=666111222"
+
+    // url 192.168.1.16:8000/api/sendsms/
+    // nickname
+    //username
+    //api_token
+    //receiver
+    //text
+
+}
+
+
 
 // --> POST     /api/usuaris/registrar/validar
 
