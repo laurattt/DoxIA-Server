@@ -63,8 +63,8 @@ app.post('/api/usuaris/registrar', async (req, res) => {
 
         console.log("Usuario creado: ",currentUser.nickname);
 
-        //const codiGenerat = await querySms(telefon);  //el api_key se solicita desde la web --> http://localhost:8000/token/
-        const codiGenerat = "654321"
+        const codiGenerat = await querySms(telefon);  //el api_key se solicita desde la web --> http://localhost:8000/token/
+        //const codiGenerat = "654321"
 
         if (!codiGenerat) {
             return res.status(500).json({
