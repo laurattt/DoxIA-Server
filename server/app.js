@@ -93,24 +93,19 @@ app.post('/api/usuaris/registrar', async (req, res) => {
     }
 });
 
-async function querySms(telefonUser) { // probar aqui? 
+async function querySms(telefonUser) {
 
     const smsNumber = Math.floor(100000 + Math.random() * 900000);
 
-    const requestBody = {
-        api_token: "ZWpujLkVdNQoJcugtl87nutR5red8C8UxhJ9C0MhQVJ4PVrOOfS65H6tfqbjbybw", // curl del Enric -> api_token=xxxYYYzzz&username=ams23&text=prova+de+missatge+text+SMS&receiver=666111222"
-        username: "uxia2",
-        receiver: telefonUser,
-        text: `El teu codi de validació és: ${smsNumber}`
-    };
+    const url = `http://192.168.1.16:8000/api/sendsms/?` +   // cambiar a curl porque anterior no dejaba
+        `api_token=hmRx7gt2BY96SDpDDtMkVVLCVbTuN7Iz9154WzVurSzOtOIng7FH3XTQYLKtAIts` +
+        `&username=uxia2` +
+        `&receiver=${telefonUser}` +
+        `&text=${encodeURIComponent(`El teu codi de validació és: ${smsNumber}`)}`;
 
     try {
-        const response = await fetch(`http://192.168.1.16:8000/api/sendsms/`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(requestBody)
+        const response = await fetch(url, {
+            method: 'GET'
         });
 
         if (!response.ok) {
@@ -121,7 +116,7 @@ async function querySms(telefonUser) { // probar aqui?
 
     } catch (error) {
         console.error('SMS request error:', error);
-        return null; 
+        return null;
     }
 }
 
