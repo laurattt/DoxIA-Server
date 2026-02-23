@@ -62,7 +62,7 @@ app.post('/api/usuaris/registrar', async (req, res) => {
         }
 
         //const codiGenerat = await querySms(telefon); 
-        const codiGenerat = 123456
+        const codiGenerat = "123456"
 
         if (!codiGenerat) {
             return res.status(500).json({

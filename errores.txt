@@ -1,0 +1,9 @@
+
+LOG 16:40
+Executing (default): SELECT `user_id`, `nickname`, `email`, `telefon`, `password`, `validat`, `role`, `api_key`, `createdAt`, `updatedAt` FROM `users` AS `User` WHERE `User`.`email` = 'testSMS@email.com' LIMIT 1;
+Executing (default): INSERT INTO `users` (`user_id`,`nickname`,`email`,`telefon`,`password`,`validat`,`role`,`createdAt`,`updatedAt`) VALUES (DEFAULT,?,?,?,?,?,?,?,?);
+SMS request error: Error: HTTP Error: 403
+    at querySms (/home/super/nodejs_server/server/app.js:113:19)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async /home/super/nodejs_server/server/app.js:65:29
+
