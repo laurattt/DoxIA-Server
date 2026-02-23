@@ -61,7 +61,7 @@ app.post('/api/usuaris/registrar', async (req, res) => {
             });
         }
 
-        console.log("Usuario creado: ",currentUser);
+        console.log("Usuario creado: ",currentUser.nickname);
 
         //const codiGenerat = await querySms(telefon);  //el api_key se solicita desde la web --> http://localhost:8000/token/
         const codiGenerat = "123456"
