@@ -164,7 +164,7 @@ const image = sequelize.define('Image', {
 
 // -------------------------------------------
 
-const sms = sequelize.define('sms',{
+const sms = sequelize.define('Sms',{
     id_sms: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
@@ -198,4 +198,4 @@ response.belongsTo(request, { foreignKey: 'request_id' });
 request.hasOne(image, { foreignKey: 'request_id' });
 image.belongsTo(request, { foreignKey: 'request_id' });
 
-module.exports = { sequelize, user, request, response, image };
+module.exports = { sequelize, user, request, response, image, sms };
