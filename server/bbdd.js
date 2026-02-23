@@ -66,10 +66,6 @@ const user = sequelize.define('User', {
     updatedAt: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW
-    },
-    sms: {
-        type: DataTypes.INTEGER,
-        defaultValue: '1234'
     }
 }, {
     tableName: 'users'
@@ -165,6 +161,29 @@ const image = sequelize.define('Image', {
 }, {
     tableName: 'images'
 });
+
+// -------------------------------------------
+
+const sms = sequelize.define('Sms',{
+    id_sms: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true
+    },
+    user_id:{
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
+    sms: {
+        type: DataTypes.INTEGER
+    },
+    telefon: {
+        type: DataTypes.INTEGER
+    }
+}, {
+    tableName: 'sms'
+});
+
 
 ////////////////////////////////
 //////    RELACIONES     ///////

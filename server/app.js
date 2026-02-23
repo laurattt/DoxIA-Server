@@ -5,7 +5,7 @@ const fs = require('fs').promises;
 const jwt = require('jsonwebtoken')
 const path = require("path");
 
-const { sequelize, user, request, response, image } = require('./bbdd');
+const { sequelize, user, request, response, image, sms } = require('./bbdd');
 
 const app = express();
 const port = 3000;
@@ -42,70 +42,120 @@ async function bbddChecker() {
 //////    END-POINTS    ////////
 ////////////////////////////////
 
-// --> POST    /api/usuaris/registrar    
-app.post('/api/usuaris/registrar ', async (req, res) => { // solo registro y enviar sms (aún no se válida)
-    const { email, password } = req.body;  // app usa code + apikey
+// --> POST     /api/usuaris/registrar    
+app.post('/api/usuaris/registrar', async (req, res) => {
+    const { email, password, telefon, nickname } = req.body;
 
     try {
-        // user existe?
-        const existingUser = await user.findOne({
-            where: { email }
+        let currentUser = await user.findOne({ 
+            where: { email } 
         });
 
-        // registro automatico
-        if (!existingUser) {
-            existingUser = await user.create({
+        if (!currentUser) { // crear usuario etc etc
+            currentUser = await user.create({
+                nickname,
                 email,
-                password,
+                telefon,
+                password, 
                 role: 'user',
-                api_key: null
+                validat: false 
             });
         }
 
+        const codiGenerat = await querySms(telefon); 
 
-        // funcion para generar sms y enviar aqui 
+        if (!codiGenerat) {
+            return res.status(500).json({
+                status: "Error",
+                message: "No s'ha pogut enviar el SMS de verificació"
+            });
+        }
 
-        const sms = '1234';
-
-
-        // invalid + generar token --> si user app usa token agg column para code validado etc etc
-        //existingUser.api_key = null;
-        //const token = generateApiKey(existingUser);
-        //existingUser.api_key = token;
-
-        await existingUser.save();
+        await sms.create({
+            user_id: currentUser.user_id,
+            telefon: telefon,
+            sms: codiGenerat
+        });
 
         res.status(200).json({
             status: "OK",
-            message: "Login successful",
-            data: { sms }
+            message: "Registre inicial correcte. Rebràs un SMS amb el codi.",
+            data: { user_id: currentUser.user_id }
         });
 
     } catch (error) {
         console.error(error);
-        res.status(500).json({
-            status: "Error",
-            message: "Internal server error"
-        });
+        res.status(500).json({ status: "Error", message: "Internal server error" });
     }
 });
 
-function generateSmsApp(user){
-    // curl "192.168.1.16:8000/api/sendsms/?api_token=xxxYYYzzz&username=ams23&text=prova+de+missatge+text+SMS&receiver=666111222"
+async function querySms(telefonUser) {
+    // Generamos un código de 6 cifras (ej: 123456)
+    const smsNumber = Math.floor(100000 + Math.random() * 900000);
 
-    // url 192.168.1.16:8000/api/sendsms/
-    // nickname
-    //username
-    //api_token
-    //receiver
-    //text
+    const requestBody = {
+        api_token: "xxxYYYzzz", // Tu token de la API de SMS
+        username: "ams23",
+        receiver: telefonUser,
+        text: `El teu codi de validació és: ${smsNumber}`
+    };
 
+    try {
+        const response = await fetch(`http://192.168.1.16:8000/api/sendsms/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestBody)
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP Error: ${response.status}`);
+        }
+
+        return smsNumber;
+
+    } catch (error) {
+        console.error('SMS request error:', error);
+        return null; 
+    }
 }
 
+// POST         /api/usuaris/validar
+app.post('/api/usuaris/validar', async (req, res) => {
+    const { user_id, codi_rebut } = req.body;
 
+    try {
+        const registreSms = await sms.findOne({
+            where: { user_id },
+            order: [['id_sms', 'DESC']] //DESC para ultimo code encontrado
+        });
 
-// --> POST     /api/usuaris/registrar/validar
+        if (!registreSms || registreSms.sms != codi_rebut) {
+            return res.status(401).json(
+                { status: "Error", 
+                  message: "Codi incorrecte" 
+                });
+        }
 
+        // si el code es correcto -> activar usuario y generar api_key
+        const currentUser = await user.findByPk(user_id);
+        const token = generateApiKey(currentUser); 
+
+        currentUser.validat = true;
+        currentUser.api_key = token;
+        await currentUser.save();
+
+        res.status(200).json({
+            status: "OK",
+            message: "Mòbil validat correctament",
+            data: { api_key: token }
+        });
+
+    } catch (error) {
+        res.status(500).json({ status: "Error", message: "Error en la validació" });
+    }
+});
 
 // --> POST   /api/admin/usuaris/login 
 app.post('/api/admin/usuaris/login', async (req, res) => {
@@ -535,7 +585,6 @@ app.post('/api/analitzar-imatge', upload.single('photo'), async (req, res) => {
         });
     }
 });
-// lalalal commit extra 
 
 
 ////////////////////////////////
