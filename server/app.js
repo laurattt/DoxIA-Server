@@ -44,7 +44,7 @@ async function bbddChecker() {
 
 // --> POST     /api/usuaris/registrar    
 app.post('/api/usuaris/registrar', async (req, res) => {
-    const { email, password, telefon, nickname } = req.body;
+    const { email, telefon, nickname } = req.body;
 
     try {
         let currentUser = await user.findOne({ 
@@ -56,13 +56,13 @@ app.post('/api/usuaris/registrar', async (req, res) => {
                 nickname,
                 email,
                 telefon,
-                password, 
                 role: 'user',
                 validat: false 
             });
         }
 
-        const codiGenerat = await querySms(telefon); 
+        //const codiGenerat = await querySms(telefon); 
+        const codiGenerat = 123456
 
         if (!codiGenerat) {
             return res.status(500).json({
