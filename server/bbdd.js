@@ -179,6 +179,9 @@ const sms = sequelize.define('Sms',{
     },
     telefon: {
         type: DataTypes.INTEGER
+    },
+    nickname:{
+        type: DataTypes.STRING
     }
 }, {
     tableName: 'sms'
