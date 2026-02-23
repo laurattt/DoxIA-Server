@@ -97,7 +97,8 @@ async function querySms(telefonUser) {
 
     const smsNumber = Math.floor(100000 + Math.random() * 900000);
 
-    const url = `http://192.168.1.16:8000/api/sendsms/?` +   // cambiar a curl porque anterior no dejaba
+    // metodo curl Enric api_token=xxxYYYzzz&username=ams23&text=prova+de+missatge+text+SMS&receiver=666111222"
+    const url = `http://192.168.1.16:8000/api/sendsms/?` +   
         `api_token=hmRx7gt2BY96SDpDDtMkVVLCVbTuN7Iz9154WzVurSzOtOIng7FH3XTQYLKtAIts` +
         `&username=uxia2` +
         `&receiver=${telefonUser}` +
