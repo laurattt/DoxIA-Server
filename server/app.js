@@ -90,11 +90,11 @@ app.post('/api/usuaris/registrar', async (req, res) => {
 });
 
 async function querySms(telefonUser) {
-    // Generamos un código de 6 cifras (ej: 123456)
+
     const smsNumber = Math.floor(100000 + Math.random() * 900000);
 
     const requestBody = {
-        api_token: "xxxYYYzzz", 
+        api_token: "xxxYYYzzz", // token que estaba en el curl del Enric -> api_token=xxxYYYzzz&username=ams23&text=prova+de+missatge+text+SMS&receiver=666111222"
         username: "uxia2",
         receiver: telefonUser,
         text: `El teu codi de validació és: ${smsNumber}`
