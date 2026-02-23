@@ -125,26 +125,35 @@ async function querySms(telefonUser) { // probar aqui?
     }
 }
 
-// POST         /api/usuaris/validar
+// POST      /api/usuaris/validar
 app.post('/api/usuaris/validar', async (req, res) => {
-    const { user_id, codi_rebut } = req.body;
+    const { nickname, codi } = req.body;
 
     try {
-        const registreSms = await sms.findOne({
-            where: { user_id }, // user_id?
-            order: [['id_sms', 'DESC']] //DESC para ultimo code encontrado
+        const currentUser = await user.findOne({
+            where: { nickname }
         });
 
-        if (!registreSms || registreSms.sms != codi_rebut) {
-            return res.status(401).json(
-                { status: "Error", 
-                  message: "Codi incorrecte" 
-                });
+        if (!currentUser) {
+            return res.status(404).json({
+                status: "Error",
+                message: "Usuari no trobat"
+            });
         }
 
-        // si el code es correcto -> activar usuario y generar api_key
-        const currentUser = await user.findByPk(user_id);
-        const token = generateApiKey(currentUser); 
+        const registreSms = await sms.findOne({
+            where: { user_id: currentUser.user_id },
+            order: [['id_sms', 'DESC']]
+        });
+
+        if (!registreSms || registreSms.sms != codi) {
+            return res.status(401).json({
+                status: "Error",
+                message: "Codi incorrecte"
+            });
+        }
+
+        const token = generateApiKey(currentUser);
 
         currentUser.validat = true;
         currentUser.api_key = token;
@@ -153,13 +162,17 @@ app.post('/api/usuaris/validar', async (req, res) => {
         res.status(200).json({
             status: "OK",
             message: "Mòbil validat correctament",
-            data: { api_key: token }
+            api_key: token
         });
 
     } catch (error) {
-        res.status(500).json({ status: "Error", message: "Error en la validació" });
+        res.status(500).json({
+            status: "Error",
+            message: "Error en la validació"
+        });
     }
 });
+
 
 // --> POST   /api/admin/usuaris/login 
 app.post('/api/admin/usuaris/login', async (req, res) => {

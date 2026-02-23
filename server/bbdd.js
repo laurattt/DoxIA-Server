@@ -181,7 +181,7 @@ const sms = sequelize.define('Sms',{
         type: DataTypes.INTEGER
     },
     nickname:{
-        type: DataTypes.STRING
+        type: DataTypes.STRING // borrar esta columna zzz
     }
 }, {
     tableName: 'sms'
