@@ -94,8 +94,8 @@ async function querySms(telefonUser) {
     const smsNumber = Math.floor(100000 + Math.random() * 900000);
 
     const requestBody = {
-        api_token: "xxxYYYzzz", // Tu token de la API de SMS
-        username: "ams23",
+        api_token: "xxxYYYzzz", 
+        username: "uxia2",
         receiver: telefonUser,
         text: `El teu codi de validació és: ${smsNumber}`
     };
