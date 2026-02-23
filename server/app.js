@@ -127,11 +127,11 @@ async function querySms(telefonUser) {
 
 // POST         /api/usuaris/validar
 app.post('/api/usuaris/validar', async (req, res) => {
-    const { telefon, codi_rebut } = req.body;
+    const { user_id, codi_rebut } = req.body;
 
     try {
         const registreSms = await sms.findOne({
-            where: { telefon },
+            where: { user_id },
             order: [['id_sms', 'DESC']] //DESC para ultimo code encontrado
         });
 
