@@ -164,7 +164,7 @@ const image = sequelize.define('Image', {
 
 // -------------------------------------------
 
-const sms = sequelize.define('Sms',{
+const sms = sequelize.define('sms',{
     id_sms: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
