@@ -64,7 +64,7 @@ app.post('/api/usuaris/registrar', async (req, res) => {
         console.log("Usuario creado: ",currentUser.nickname);
 
         //const codiGenerat = await querySms(telefon);  //el api_key se solicita desde la web --> http://localhost:8000/token/
-        const codiGenerat = "234587"
+        const codiGenerat = "654321"
 
         if (!codiGenerat) {
             return res.status(500).json({
@@ -127,11 +127,11 @@ async function querySms(telefonUser) { // probar aqui?
 
 // POST         /api/usuaris/validar
 app.post('/api/usuaris/validar', async (req, res) => {
-    const { nickname, codi_rebut } = req.body;
+    const { user_id, codi_rebut } = req.body;
 
     try {
         const registreSms = await sms.findOne({
-            where: { nickname },
+            where: { user_id }, // user_id?
             order: [['id_sms', 'DESC']] //DESC para ultimo code encontrado
         });
 
