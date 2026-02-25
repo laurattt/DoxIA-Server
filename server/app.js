@@ -478,14 +478,11 @@ app.get('/api/admin/tags', async (req, res) => {
         
         const responses = await response.findAll({
             attributes: ['tags'],
-            where: {
-                tags: { [Op.ne]: null }
-            }
         })
 
         const tagCounts = {};
 
-        responses.forEach(response =>{
+        responses.forEach(response => {
             if (response.tags && Array.isArray(response.tags)) {
                 response.tags.forEach(tag => {
                     tagCounts[tag] = (tagCounts[tag] || 0) + 1;
