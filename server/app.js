@@ -387,6 +387,12 @@ app.post('/api/admin/usuaris/add', async (req, res) => {
         newUser.api_key = token;
         
         await newUser.save();
+
+        res.status(200).json({
+            status: "OK",
+            message: 'Added user successfully',
+            data: {}
+        });
     } catch (error) {
         console.error('Error adding user:', error);
         res.status(500).json({
@@ -429,15 +435,87 @@ app.post('/api/admin/usuaris/remove', async (req, res) => {
             },
         });
 
+        res.status(200).json({
+            status: "OK",
+            message: 'Removed user successfully',
+            data: {}
+        });
+
     } catch (error) {
-        console.error('Error adding user:', error);
+        console.error('Error removing user:', error);
         res.status(500).json({
             status: "Error",
             message: 'Internal server error',
             data: {}
         });
     }
-})
+});
+
+// --> GET /api/admin/tags
+app.get('/api/admin/tags', async (req, res) => {
+    const apiKey = req.headers['x-api-key'];
+    const { user_id } = req.body;
+
+    if (!apiKey) {
+        return res.status(401).json({
+            status: "Error",
+            message: "Missing API key",
+            data: {}
+        });
+    }
+
+    try {
+        const adminUser = await user.findOne({
+            where: { api_key: apiKey, role: 'admin' }
+        });
+
+        if (!adminUser) {
+            return res.status(401).json({
+                status: "Error",
+                message: 'Invalid API key',
+                data: {}
+            });
+        }
+        
+        const responses = await response.findAll({
+            attributes: ['tags'],
+            where: {
+                tags: { [Op.ne]: null }
+            }
+        })
+
+        const tagCounts = {};
+
+        responses.forEach(response =>{
+            if (response.tags && Array.isArray(response.tags)) {
+                response.tags.forEach(tag => {
+                    tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+                });
+            } else if (response.tags && typeof response.tags === 'object') {
+                Object.values(response.tags).forEach(tag => {
+                    tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+                });
+            }
+        });
+
+        const result = Object.entries(tagCounts)
+            .map(([tag, count]) => ({ tag, count }))
+            .sort((a, b) => b.count . a.count);
+        
+        res.status(200).json({
+            status: "OK",
+            message: 'Tags fetched successfully',
+            data: result
+        });
+    } catch (error) {
+        console.error('Error fetching tags:', error);
+        res.status(500).json({
+            status: "Error",
+            message: 'Internal server error',
+            data: {}
+        });
+    }
+});
 
 // generar token (zzzzzzzzzzzzzzz)
 function generateApiKey(user) {
