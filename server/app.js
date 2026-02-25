@@ -454,7 +454,6 @@ app.post('/api/admin/usuaris/remove', async (req, res) => {
 // --> GET /api/admin/tags
 app.get('/api/admin/tags', async (req, res) => {
     const apiKey = req.headers['x-api-key'];
-    const { user_id } = req.body;
 
     if (!apiKey) {
         return res.status(401).json({
