@@ -480,9 +480,9 @@ app.get('/api/admin/tags', async (req, res) => {
             attributes: ['tags'],
         })
 
-        const tagCounts = {};
+        const tagCounts = new Map();
 
-        responses.forEach(response => {
+        responses.forEach(response =>{
             if (response.tags && Array.isArray(response.tags)) {
                 response.tags.forEach(tag => {
                     tagCounts[tag] = (tagCounts[tag] || 0) + 1;
@@ -494,14 +494,10 @@ app.get('/api/admin/tags', async (req, res) => {
             }
         });
 
-        const result = Object.entries(tagCounts)
-            .map(([tag, count]) => ({ tag, count }))
-            .sort((a, b) => b.count . a.count);
-        
         res.status(200).json({
             status: "OK",
             message: 'Tags fetched successfully',
-            data: result
+            data: tagCounts
         });
     } catch (error) {
         console.error('Error fetching tags:', error);
